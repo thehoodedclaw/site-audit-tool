@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MetaForge — Free SEO Meta Tag Generator & Checker</title>
+  <meta name="description" content="Generate perfect meta tags for any website. Free SEO tool that creates Open Graph, Twitter Cards, and structured data markup instantly.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://thehoodedclaw.github.io/site-audit-tool/">
+  <meta property="og:title" content="MetaForge — Free SEO Meta Tag Generator">
+  <meta property="og:description" content="Generate perfect meta tags for any website. Open Graph, Twitter Cards, structured data.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    :root {
+      --bg: #0c1220;
+      --surface: #131b2e;
+      --card: #1a2540;
+      --border: rgba(99,179,237,0.12);
+      --text: #e8edf5;
+      --muted: #7b8db5;
+      --accent: #4da6ff;
+      --green: #34d399;
+      --orange: #fbbf24;
+      --red: #f87171;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+    header { padding: 24px 0; border-bottom: 1px solid var(--border); }
+    header .container { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-weight: 800; font-size: 1.3rem; color: var(--accent); }
+    .logo span { color: var(--green); }
+    nav a { color: var(--muted); text-decoration: none; margin-left: 20px; font-size: 0.9rem; }
+    nav a:hover { color: var(--text); }
+
+    .hero { padding: 60px 0 40px; text-align: center; }
+    .hero h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; margin-bottom: 12px; }
+    .hero h1 .hl { color: var(--accent); }
+    .hero p { color: var(--muted); font-size: 1.05rem; max-width: 500px; margin: 0 auto; }
+
+    .input-section { padding: 20px 0 40px; }
+    .input-group { display: flex; gap: 12px; flex-wrap: wrap; }
+    .input-group input {
+      flex: 1;
+      min-width: 200px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 1rem;
+    }
+    .input-group input:focus { outline: none; border-color: var(--accent); }
+    .input-group button {
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #0c1220;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .input-group button:hover { opacity: 0.9; }
+    .input-group button:disabled { opacity: 0.5; cursor: wait; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .tab.active { background: var(--accent); color: #0c1220; border-color: var(--accent); font-weight: 600; }
+
+    .results { padding: 0 0 60px; display: none; }
+    .results.show { display: block; }
+
+    .score-ring {
+      text-align: center;
+      padding: 30px 0;
+    }
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 800;
+      border: 4px solid;
+    }
+    .score-label { color: var(--muted); margin-top: 8px; font-size: 0.9rem; }
+
+    .checks { display: grid; gap: 12px; }
+    .check {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .check-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+    .check-pass .check-icon { color: var(--green); }
+    .check-warn .check-icon { color: var(--orange); }
+    .check-fail .check-icon { color: var(--red); }
+    .check-title { font-weight: 600; font-size: 0.95rem; }
+    .check-detail { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+    .check-fix { color: var(--accent); font-size: 0.85rem; margin-top: 6px; }
+
+    .output-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .output-block pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-size: 0.85rem;
+      color: var(--green);
+      line-height: 1.7;
+    }
+    .copy-btn {
+      float: right;
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    .hidden { display: none; }
+
+    footer {
+      padding: 30px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .hero { padding: 40px 0 20px; }
+      .input-group { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="logo">Meta<span>Forge</span></div>
+    <nav>
+      <a href="#generator">Generator</a>
+      <a href="#checker">Checker</a>
+      <a href="#output">Output</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <h1>Perfect <span class="hl">Meta Tags</span> in Seconds</h1>
+    <p>Generate, validate, and export SEO meta tags. Open Graph, Twitter Cards, and structured data — free.</p>
+  </div>
+</section>
+
+<section class="input-section" id="generator">
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('generate')">Generator</button>
+      <button class="tab" onclick="switchTab('checker')">Check Existing Page</button>
+    </div>
+
+    <div id="tab-generate">
+      <div style="display:grid; gap:16px;">
+        <div>
+          <label style="color:var(--muted); font-size:0.85rem; display:block; margin-bottom:6px;">Page Title *</label>
+          <input type="text" id="gen-title" placeholder="My Awesome Page" style="width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:1rem;">
+        </div>
+        <div>
+          <label style="color:var(--muted); font-size:0.85rem; display:block; margin-bottom:6px;">Description *</label>
+          <textarea id="gen-desc" placeholder="A brief description of your page for search engines" style="width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:1rem; min-height:80px; resize:vertical;"></textarea>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <div>
+            <label style="color:var(--muted); font-size:0.85rem; display:block; margin-bottom:6px;">URL</label>
+            <input type="url" id="gen-url" placeholder="https://example.com/page" style="width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:1rem;">
+          </div>
+          <div>
+            <label style="color:var(--muted); font-size:0.85rem; display:block; margin-bottom:6px;">Image URL</label>
+            <input type="url" id="gen-image" placeholder="https://example.com/image.jpg" style="width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:1rem;">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <div>
+            <label style="color:var(--muted); font-size:0.85rem; display:block; margin-bottom:6px;">Site Name</label>
+            <input type="text" id="gen-sitename" placeholder="My Site" style="width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:1rem;">
+          </div>
+          <div>
+            <label style="color:var(--muted); font-size:0.85rem; display:block; margin-bottom:6px;">Twitter Handle</label>
+            <input type="text" id="gen-twitter" placeholder="@username" style="width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:1rem;">
+          </div>
+        </div>
+        <button onclick="generateMeta()" style="padding:14px 28px; border-radius:10px; border:none; background:var(--accent); color:#0c1220; font-weight:700; font-size:1rem; cursor:pointer;">Generate Meta Tags</button>
+      </div>
+    </div>
+
+    <div id="tab-checker" class="hidden">
+      <p style="color:var(--muted); margin-bottom:12px; font-size:0.9rem;">Paste your page's HTML source to check meta tags:</p>
+      <textarea id="check-html" placeholder="Paste your HTML here..." style="width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:0.9rem; min-height:150px; font-family:monospace; resize:vertical;"></textarea>
+      <button onclick="checkMeta()" style="margin-top:12px; padding:14px 28px; border-radius:10px; border:none; background:var(--accent); color:#0c1220; font-weight:700; font-size:1rem; cursor:pointer;">Analyze Meta Tags</button>
+    </div>
+  </div>
+</section>
+
+<section class="results" id="results">
+  <div class="container">
+    <div class="score-ring" id="score-section"></div>
+    <div class="checks" id="checks-list"></div>
+    <div id="output" class="output-block">
+      <button class="copy-btn" onclick="copyOutput()">Copy</button>
+      <h3 style="margin-bottom:12px; font-size:1rem;">Generated Meta Tags</h3>
+      <pre id="meta-output"></pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>MetaForge — Free SEO Meta Tag Tool by <a href="https://github.com/thehoodedclaw">The Hooded Claw</a></p>
+    <p style="margin-top:4px;">Open source. No tracking. No ads.</p>
+  </div>
+</footer>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-generate').classList.toggle('hidden', tab !== 'generate');
+  document.getElementById('tab-checker').classList.toggle('hidden', tab !== 'checker');
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function generateMeta() {
+  const title = document.getElementById('gen-title').value.trim();
+  const desc = document.getElementById('gen-desc').value.trim();
+  const url = document.getElementById('gen-url').value.trim();
+  const image = document.getElementById('gen-image').value.trim();
+  const sitename = document.getElementById('gen-sitename').value.trim();
+  const twitter = document.getElementById('gen-twitter').value.trim();
+
+  if (!title || !desc) {
+    alert('Title and Description are required.');
+    return;
+  }
+
+  let tags = [];
+  let checks = [];
+
+  // Basic tags
+  tags.push(`<title>${escapeHtml(title)}</title>`);
+  tags.push(`<meta name="description" content="${escapeHtml(desc)}">`);
+  tags.push(`<meta name="robots" content="index, follow">`);
+
+  // Title check
+  if (title.length > 60) {
+    checks.push({ status: 'warn', title: 'Title too long', detail: `${title.length} chars — Google truncates at ~60`, fix: 'Shorten to under 60 characters' });
+  } else if (title.length < 30) {
+    checks.push({ status: 'warn', title: 'Title too short', detail: `${title.length} chars — aim for 30-60 characters`, fix: 'Add more descriptive keywords' });
+  } else {
+    checks.push({ status: 'pass', title: 'Title length', detail: `${title.length} characters — optimal range` });
+  }
+
+  // Description check
+  if (desc.length > 160) {
+    checks.push({ status: 'warn', title: 'Description too long', detail: `${desc.length} chars — Google truncates at ~160`, fix: 'Shorten to under 160 characters' });
+  } else if (desc.length < 70) {
+    checks.push({ status: 'warn', title: 'Description too short', detail: `${desc.length} chars — aim for 70-160 characters`, fix: 'Add more detail for better CTR' });
+  } else {
+    checks.push({ status: 'pass', title: 'Description length', detail: `${desc.length} characters — optimal range` });
+  }
+
+  // Canonical URL
+  if (url) {
+    tags.push(`<link rel="canonical" href="${escapeHtml(url)}">`);
+    checks.push({ status: 'pass', title: 'Canonical URL', detail: url });
+  } else {
+    checks.push({ status: 'fail', title: 'Missing canonical URL', detail: 'No canonical URL specified', fix: 'Add your page URL to prevent duplicate content issues' });
+  }
+
+  // Open Graph
+  tags.push('');
+  tags.push('<!-- Open Graph -->');
+  tags.push(`<meta property="og:title" content="${escapeHtml(title)}">`);
+  tags.push(`<meta property="og:description" content="${escapeHtml(desc)}">`);
+  tags.push(`<meta property="og:type" content="website">`);
+  if (url) tags.push(`<meta property="og:url" content="${escapeHtml(url)}">`);
+  if (image) {
+    tags.push(`<meta property="og:image" content="${escapeHtml(image)}">`);
+    tags.push(`<meta property="og:image:width" content="1200">`);
+    tags.push(`<meta property="og:image:height" content="630">`);
+    checks.push({ status: 'pass', title: 'OG Image', detail: image });
+  } else {
+    checks.push({ status: 'fail', title: 'Missing OG Image', detail: 'No image specified for social sharing', fix: 'Add an image URL (1200x630px recommended)' });
+  }
+  if (sitename) tags.push(`<meta property="og:site_name" content="${escapeHtml(sitename)}">`);
+
+  // Twitter Cards
+  tags.push('');
+  tags.push('<!-- Twitter Cards -->');
+  tags.push(`<meta name="twitter:card" content="summary_large_image">`);
+  tags.push(`<meta name="twitter:title" content="${escapeHtml(title)}">`);
+  tags.push(`<meta name="twitter:description" content="${escapeHtml(desc)}">`);
+  if (image) tags.push(`<meta name="twitter:image" content="${escapeHtml(image)}">`);
+  if (twitter) {
+    const handle = twitter.startsWith('@') ? twitter : '@' + twitter;
+    tags.push(`<meta name="twitter:site" content="${escapeHtml(handle)}">`);
+    tags.push(`<meta name="twitter:creator" content="${escapeHtml(handle)}">`);
+    checks.push({ status: 'pass', title: 'Twitter handle', detail: handle });
+  } else {
+    checks.push({ status: 'warn', title: 'No Twitter handle', detail: 'Twitter attribution not set', fix: 'Add your @handle for Twitter card attribution' });
+  }
+
+  // Structured Data
+  tags.push('');
+  tags.push('<!-- Structured Data (JSON-LD) -->');
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": title,
+    "description": desc
+  };
+  if (url) jsonLd.url = url;
+  if (sitename) jsonLd.isPartOf = { "@type": "WebSite", name: sitename };
+  tags.push('<script type="application/ld+json">');
+  tags.push(JSON.stringify(jsonLd, null, 2));
+  tags.push('</script>');
+
+  checks.push({ status: 'pass', title: 'Structured data', detail: 'JSON-LD schema included' });
+
+  // Score
+  const passCount = checks.filter(c => c.status === 'pass').length;
+  const warnCount = checks.filter(c => c.status === 'warn').length;
+  const failCount = checks.filter(c => c.status === 'fail').length;
+  const score = Math.round((passCount / checks.length) * 100);
+
+  // Render
+  renderResults(score, checks, tags.join('\n'));
+}
+
+function checkMeta() {
+  const html = document.getElementById('check-html').value;
+  if (!html.trim()) {
+    alert('Paste your HTML first.');
+    return;
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  let checks = [];
+
+  // Title
+  const title = doc.querySelector('title')?.textContent || '';
+  if (title) {
+    if (title.length > 60) checks.push({ status: 'warn', title: 'Title too long', detail: `${title.length} chars` });
+    else if (title.length < 30) checks.push({ status: 'warn', title: 'Title too short', detail: `${title.length} chars` });
+    else checks.push({ status: 'pass', title: 'Title', detail: `${title.length} chars: "${title}"` });
+  } else {
+    checks.push({ status: 'fail', title: 'Missing <title>', detail: 'No title tag found', fix: 'Add a <title> tag (30-60 chars)' });
+  }
+
+  // Description
+  const desc = doc.querySelector('meta[name="description"]')?.content || '';
+  if (desc) {
+    if (desc.length > 160) checks.push({ status: 'warn', title: 'Description too long', detail: `${desc.length} chars` });
+    else if (desc.length < 70) checks.push({ status: 'warn', title: 'Description too short', detail: `${desc.length} chars` });
+    else checks.push({ status: 'pass', title: 'Description', detail: `${desc.length} chars` });
+  } else {
+    checks.push({ status: 'fail', title: 'Missing meta description', detail: 'No description found', fix: 'Add <meta name="description">' });
+  }
+
+  // Robots
+  const robots = doc.querySelector('meta[name="robots"]')?.content || '';
+  if (robots) checks.push({ status: 'pass', title: 'Robots directive', detail: robots });
+  else checks.push({ status: 'warn', title: 'No robots directive', detail: 'Default behavior applies', fix: 'Add <meta name="robots" content="index, follow">' });
+
+  // Canonical
+  const canonical = doc.querySelector('link[rel="canonical"]')?.href || '';
+  if (canonical) checks.push({ status: 'pass', title: 'Canonical URL', detail: canonical });
+  else checks.push({ status: 'fail', title: 'Missing canonical', detail: 'No canonical URL', fix: 'Add <link rel="canonical" href="...">' });
+
+  // OG tags
+  const ogTitle = doc.querySelector('meta[property="og:title"]')?.content || '';
+  const ogDesc = doc.querySelector('meta[property="og:description"]')?.content || '';
+  const ogImage = doc.querySelector('meta[property="og:image"]')?.content || '';
+  const ogUrl = doc.querySelector('meta[property="og:url"]')?.content || '';
+
+  if (ogTitle && ogDesc) checks.push({ status: 'pass', title: 'Open Graph tags', detail: 'Title and description present' });
+  else checks.push({ status: 'fail', title: 'Missing Open Graph', detail: 'OG title/description not found', fix: 'Add og:title and og:description' });
+
+  if (ogImage) checks.push({ status: 'pass', title: 'OG Image', detail: ogImage });
+  else checks.push({ status: 'fail', title: 'Missing OG Image', detail: 'No image for social sharing', fix: 'Add <meta property="og:image" content="...">' });
+
+  // Twitter
+  const twCard = doc.querySelector('meta[name="twitter:card"]')?.content || '';
+  const twTitle = doc.querySelector('meta[name="twitter:title"]')?.content || '';
+  if (twCard) checks.push({ status: 'pass', title: 'Twitter Card', detail: twCard });
+  else checks.push({ status: 'warn', title: 'No Twitter Card', detail: 'Twitter tags not found', fix: 'Add Twitter Card meta tags' });
+
+  // Structured Data
+  const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+  if (jsonLdScripts.length > 0) {
+    checks.push({ status: 'pass', title: 'Structured data', detail: `${jsonLdScripts.length} JSON-LD block(s) found` });
+  } else {
+    checks.push({ status: 'warn', title: 'No structured data', detail: 'No JSON-LD found', fix: 'Add structured data for rich search results' });
+  }
+
+  // H1
+  const h1s = doc.querySelectorAll('h1');
+  if (h1s.length === 0) checks.push({ status: 'fail', title: 'No H1 tag', detail: 'Page has no heading', fix: 'Add exactly one <h1> per page' });
+  else if (h1s.length > 1) checks.push({ status: 'warn', title: 'Multiple H1 tags', detail: `${h1s.length} found`, fix: 'Use only one H1 per page' });
+  else checks.push({ status: 'pass', title: 'H1 tag', detail: 'One H1 found — correct' });
+
+  // Lang
+  const lang = doc.documentElement.lang || '';
+  if (lang) checks.push({ status: 'pass', title: 'Language attribute', detail: lang });
+  else checks.push({ status: 'warn', title: 'No lang attribute', detail: 'html tag missing lang', fix: 'Add <html lang="en">' });
+
+  // Score
+  const passCount = checks.filter(c => c.status === 'pass').length;
+  const score = Math.round((passCount / checks.length) * 100);
+
+  renderResults(score, checks, null);
+}
+
+function renderResults(score, checks, metaOutput) {
+  const section = document.getElementById('results');
+  section.classList.add('show');
+
+  // Score
+  const scoreSection = document.getElementById('score-section');
+  let color, label;
+  if (score >= 80) { color = 'var(--green)'; label = 'Excellent'; }
+  else if (score >= 60) { color = 'var(--orange)'; label = 'Needs work'; }
+  else { color = 'var(--red)'; label = 'Poor'; }
+  scoreSection.innerHTML = `
+    <div class="score-circle" style="border-color:${color}; color:${color}">${score}</div>
+    <div class="score-label">${label} — ${checks.filter(c=>c.status==='pass').length} passed, ${checks.filter(c=>c.status==='warn').length} warnings, ${checks.filter(c=>c.status==='fail').length} issues</div>
+  `;
+
+  // Checks
+  const checksList = document.getElementById('checks-list');
+  checksList.innerHTML = checks.map(c => {
+    const icon = c.status === 'pass' ? '✓' : c.status === 'warn' ? '⚠' : '✗';
+    return `<div class="check check-${c.status}">
+      <div class="check-icon">${icon}</div>
+      <div>
+        <div class="check-title">${c.title}</div>
+        <div class="check-detail">${c.detail}</div>
+        ${c.fix ? `<div class="check-fix">Fix: ${c.fix}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Output
+  const outputBlock = document.getElementById('output');
+  const outputPre = document.getElementById('meta-output');
+  if (metaOutput) {
+    outputBlock.style.display = 'block';
+    outputPre.textContent = metaOutput;
+  } else {
+    outputBlock.style.display = 'none';
+  }
+
+  section.scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyOutput() {
+  const text = document.getElementById('meta-output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+
+</body>
+</html>
