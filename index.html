@@ -158,9 +158,17 @@
     }
     footer a { color: var(--accent); text-decoration: none; }
 
+    .order-form .field { margin-bottom: 12px; }
+    .order-form label { color: var(--muted); display:block; margin-bottom:6px; font-size:0.85rem; }
+    .order-form input, .order-form select, .order-form textarea { width:100%; padding:12px 14px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); }
+    .order-actions { display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap; }
+    .btn-secondary { background:transparent; border:1px solid var(--border); color:var(--muted); padding:10px 14px; border-radius:8px; cursor:pointer; }
+    .btn-primary { background:var(--accent); color:#0c1220; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; font-weight:700; }
+
     @media (max-width: 640px) {
       .hero { padding: 40px 0 20px; }
       .input-group { flex-direction: column; }
+      .order-actions { flex-direction:column; align-items:stretch; }
     }
   </style>
 </head>
@@ -173,6 +181,7 @@
       <a href="#generator">Generator</a>
       <a href="#checker">Checker</a>
       <a href="#output">Output</a>
+      <a href="#order" style="color:var(--accent); font-weight:600; margin-left:18px;">Order</a>
     </nav>
   </div>
 </header>
@@ -187,8 +196,9 @@
 <section class="input-section" id="generator">
   <div class="container">
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('generate')">Generator</button>
-      <button class="tab" onclick="switchTab('checker')">Check Existing Page</button>
+      <button class="tab active" onclick="switchTab('generate', event)">Generator</button>
+      <button class="tab" onclick="switchTab('checker', event)">Check Existing Page</button>
+      <button class="tab" onclick="switchTab('order', event)">Order</button>
     </div>
 
     <div id="tab-generate">
@@ -230,6 +240,43 @@
       <textarea id="check-html" placeholder="Paste your HTML here..." style="width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:0.9rem; min-height:150px; font-family:monospace; resize:vertical;"></textarea>
       <button onclick="checkMeta()" style="margin-top:12px; padding:14px 28px; border-radius:10px; border:none; background:var(--accent); color:#0c1220; font-weight:700; font-size:1rem; cursor:pointer;">Analyze Meta Tags</button>
     </div>
+
+    <div id="tab-order" class="hidden" aria-labelledby="order">
+      <a id="order"></a>
+      <div class="order-form" style="margin-top:6px;">
+        <div class="field">
+          <label for="order-name">Name *</label>
+          <input id="order-name" type="text" placeholder="Your name">
+        </div>
+        <div class="field">
+          <label for="order-email">Email *</label>
+          <input id="order-email" type="email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label for="order-url">Website URL *</label>
+          <input id="order-url" type="url" placeholder="https://example.com">
+        </div>
+        <div class="field">
+          <label for="order-package">Package *</label>
+          <select id="order-package">
+            <option value="Basic">Basic — $75 — Quick audit and checklist</option>
+            <option value="Standard">Standard — $250 — In-depth audit with prioritized fixes</option>
+            <option value="Premium">Premium — $500 — Full audit, recommendations, and implementation plan</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="order-details">What do you need?</label>
+          <textarea id="order-details" placeholder="Tell me what to focus on (SEO, social, meta tags, structured data, etc.)" style="min-height:100px"></textarea>
+        </div>
+
+        <div class="order-actions">
+          <button class="btn-primary" onclick="submitOrder()">Submit Request</button>
+          <button class="btn-secondary" onclick="clearOrderForm()">Clear</button>
+          <div id="order-result" style="margin-left:auto;color:var(--muted);font-size:0.9rem"></div>
+        </div>
+
+      </div>
+    </div>
   </div>
 </section>
 
@@ -252,17 +299,20 @@
   </div>
 
 <div style="text-align:center;margin-top:12px;">
-  <a href="https://github.com/thehoodedclaw/site-audit-tool/issues" style="color:#4da6ff;text-decoration:none;font-weight:700;margin-right:12px">Hire me / Request a paid report</a>
+  <a href="#order" style="color:#4da6ff;text-decoration:none;font-weight:700;margin-right:12px">Hire me / Request a paid report</a>
   <a href="https://github.com/sponsors/thehoodedclaw" style="color:#34d399;text-decoration:none;font-weight:700">Sponsor / Donate</a>
 </div>
 </footer>
 
 <script>
-function switchTab(tab) {
+function switchTab(tab, ev) {
+  // tabs
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
+  if (ev && ev.target) ev.target.classList.add('active');
+  // show/hide sections
   document.getElementById('tab-generate').classList.toggle('hidden', tab !== 'generate');
   document.getElementById('tab-checker').classList.toggle('hidden', tab !== 'checker');
+  document.getElementById('tab-order').classList.toggle('hidden', tab !== 'order');
 }
 
 function escapeHtml(str) {
@@ -509,6 +559,79 @@ function copyOutput() {
     const btn = document.querySelector('.copy-btn');
     btn.textContent = 'Copied!';
     setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+// Order form handling
+function clearOrderForm() {
+  document.getElementById('order-name').value = '';
+  document.getElementById('order-email').value = '';
+  document.getElementById('order-url').value = '';
+  document.getElementById('order-package').value = 'Basic';
+  document.getElementById('order-details').value = '';
+  document.getElementById('order-result').innerHTML = '';
+}
+
+function submitOrder() {
+  const name = document.getElementById('order-name').value.trim();
+  const email = document.getElementById('order-email').value.trim();
+  const url = document.getElementById('order-url').value.trim();
+  const pack = document.getElementById('order-package').value;
+  const details = document.getElementById('order-details').value.trim();
+
+  if (!name || !email || !url) {
+    alert('Please fill Name, Email, and Website URL.');
+    return;
+  }
+
+  // simple email validation
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!emailOk) { alert('Please enter a valid email address.'); return; }
+
+  const subject = `SEO Report Request — ${pack} — ${name}`;
+  const bodyLines = [
+    `Name: ${name}`,
+    `Email: ${email}`,
+    `Website: ${url}`,
+    `Package: ${pack}`,
+    `Details:`,
+    details || '(none)'
+  ];
+  const body = bodyLines.join('\n');
+
+  // mailto
+  const mailto = `mailto:jon@it1st.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  // GitHub issue URL
+  const ghTitle = `${subject}`;
+  const ghBody = bodyLines.join('\n');
+  const ghUrl = `https://github.com/thehoodedclaw/site-audit-tool/issues/new?title=${encodeURIComponent(ghTitle)}&body=${encodeURIComponent(ghBody)}`;
+
+  // show result
+  const resultEl = document.getElementById('order-result');
+  resultEl.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center;">
+      <a href="${mailto}" style="background:var(--accent);color:#0c1220;padding:8px 10px;border-radius:8px;font-weight:700;text-decoration:none;">Open mail client</a>
+      <a href="${ghUrl}" target="_blank" rel="noopener" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 10px;border-radius:8px;text-decoration:none;">Open GitHub Issue</a>
+      <button class="btn-secondary" onclick="copyOrder('${escapeForCopy(subject)}','${escapeForCopy(body)}')">Copy details</button>
+    </div>
+  `;
+}
+
+function escapeForCopy(s) {
+  return s.replace(/'/g, "\\'").replace(/\n/g, '\\n');
+}
+
+function copyOrder(title, body) {
+  const text = `Title: ${title}\n\n${body}`;
+  navigator.clipboard.writeText(text).then(() => {
+    const el = document.getElementById('order-result');
+    const note = document.createElement('span');
+    note.style.color = 'var(--green)';
+    note.style.marginLeft = '10px';
+    note.textContent = 'Copied to clipboard';
+    el.appendChild(note);
+    setTimeout(() => el.removeChild(note), 2000);
   });
 }
 </script>
